@@ -1,3 +1,5 @@
+import typing
+
 import h5py
 import tables
 import os
@@ -6,6 +8,11 @@ import hdf5_getters as h5g
 
 def is_array(object):
     return isinstance(object, numpy.ndarray)
+
+def remove_byte_chars(bytes):
+    string = str(bytes).replace('b\'', '')
+    return string.replace('\'','')
+
 
 def build_h5_dictionary(h5_file, song_id):
     fields = ['artist_familiarity',
@@ -96,16 +103,16 @@ def clean_h5_dictionary(input_dict):
 
     if ( (input_dict['artist_id'] is None) or (input_dict['artist_id'] is ' ') ):
         return l
-    elif not (isinstance(input_dict['artist_id'], str)):
+    elif not (isinstance(input_dict['artist_id'], typing.ByteString)):
         return l
     #missing regex
 
     mbid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
     if ( (input_dict['artist_mbid'] is None) or (input_dict['artist_mbid'] is ' ') ):
         return l
-    elif not (isinstance(input_dict['artist_mbid'], str)):
+    elif not (isinstance(input_dict['artist_mbid'], typing.ByteString)):
         return l
-    elif not (re.match(mbid, input_dict['artist_mbid'])):
+    elif not (re.match(mbid, remove_byte_chars(input_dict['artist_mbid']))):
         return l
 
     playmeid = r"\d{4}"
@@ -113,11 +120,11 @@ def clean_h5_dictionary(input_dict):
         return l
     elif not (isinstance(input_dict['artist_playmeid'],int)):
         input_dict['artist_playmeid'] = int(input_dict['artist_playmeid'])
-    elif not (re.match(playmeid, input_dict['artist_playmeid'])):
+    elif not (re.match(playmeid, str(input_dict['artist_playmeid']))):
         return l
 
     #missing regex
-    if not (isinstance(input_dict['artist_7digitalid'],int)):
+    if not (isinstance(input_dict['artist_7digitalid'],numpy.int32)):
         return l
 
     if not (isinstance(input_dict['artist_latitude'],float)):
@@ -126,44 +133,44 @@ def clean_h5_dictionary(input_dict):
     if not (isinstance(input_dict['artist_longitude'],float)):
         return l
 
-    if not (isinstance(input_dict['artist_location'], str)):
+    if not (isinstance(input_dict['artist_location'], typing.ByteString)):
         return l
 
-    if not (isinstance(input_dict['artist_name'], str)):
+    if not (isinstance(input_dict['artist_name'], typing.ByteString)):
         return l
 
-    if not (isinstance(input_dict['release'], str)):
+    if not (isinstance(input_dict['release'], typing.ByteString)):
         return l
 
     if ( (input_dict['release_7digitalid'] is None) or (input_dict['release_7digitalid'] is ' ') ):
         return l
-    elif not (isinstance(input_dict['release_7digitalid'], int)):
+    elif not (isinstance(input_dict['release_7digitalid'], numpy.int32)):
         return l
 
     if ( (input_dict['song_id'] is None) or (input_dict['song_id'] is ' ') ):
         return l
-    elif not (isinstance(input_dict['song_id'], str)):
+    elif not (isinstance(input_dict['song_id'], typing.ByteString)):
         return l
 
     if not (isinstance(input_dict['song_hotttnesss'],float)):
         return l
 
-    if not (isinstance(input_dict['title'], str)):
+    if not (isinstance(input_dict['title'], typing.ByteString)):
         return l
 
     if ( (input_dict['track_7digitalid'] is None) or (input_dict['track_7digitalid'] is ' ') ):
         return l
-    elif not (isinstance(input_dict['track_7digitalid'], int)):
+    elif not (isinstance(input_dict['track_7digitalid'], numpy.int32)):
         return l
 
     #missing range ?
-    if not (isinstance(input_dict['analysis_sample_rate'],float)):
+    if not (isinstance(input_dict['analysis_sample_rate'], numpy.int32)):
         return l
 
     audio = r"\w{32}"
-    if not (isinstance(input_dict['audio_md5'], str)):
+    if not (isinstance(input_dict['audio_md5'], typing.ByteString)):
         return l
-    elif not (re.match(audio, input_dict['audio_md5'])):
+    elif not (re.match(audio, remove_byte_chars(input_dict['audio_md5']))):
         return l
 
     if not (isinstance(input_dict['danceability'],float)):
@@ -182,7 +189,7 @@ def clean_h5_dictionary(input_dict):
     if not (isinstance(input_dict['energy'],float)):
         return l
 
-    if not (isinstance(input_dict['key'],int)):
+    if not (isinstance(input_dict['key'], numpy.int32)):
         return l
 
     if not (isinstance(input_dict['key_confidence'],float)):
@@ -192,26 +199,26 @@ def clean_h5_dictionary(input_dict):
         return l
 
     m = r"\d{1}"
-    if not (isinstance(input_dict['mode'],int)):
+    if not (isinstance(input_dict['mode'],numpy.int32)):
         return l
-    elif not (re.match(m, input_dict['mode'])):
+    elif not (re.match(m, str(input_dict['mode']))):
         return l
 
     if not (isinstance(input_dict['mode_confidence'],float)):
         return l
 
-    if not (isinstance(input_dict['release'], str)):
+    if not (isinstance(input_dict['release'], typing.ByteString)):
         return l
 
     if not (isinstance(input_dict['start_of_fade_out'],float)):
         input_dict['duration'] = float(input_dict['duration'])
-    elif (input_dict['start_of_fade_out']<input_dict['duration']):
+    elif (input_dict['start_of_fade_out']>input_dict['duration']):
         return l
 
     if not (isinstance(input_dict['tempo'],float)):
         return l
 
-    if not (isinstance(input_dict['time_signature'],int)):
+    if not (isinstance(input_dict['time_signature'],numpy.int32)):
         return l
 
     if not (isinstance(input_dict['time_signature_confidence'],float)):
@@ -219,22 +226,26 @@ def clean_h5_dictionary(input_dict):
 
     if ( (input_dict['track_id'] is None) or (input_dict['track_id'] is ' ') ):
         return l
-    elif not (isinstance(input_dict['track_id'], str)):
+    elif not (isinstance(input_dict['track_id'], typing.ByteString)):
         return l
 
     ayear = r"\d{4}"
-    if not (isinstance(input_dict['year'],int)):
+    if not (isinstance(input_dict['year'],numpy.int32)):
         return l
-    elif (input_dict['year'] != 0 and not re.match(ayear, input_dict['year'])):
+    elif (input_dict['year'] != 0 and not re.match(ayear, str(input_dict['year']))):
         return l
+
+    for key, value in input_dict.items():
+        if isinstance(input_dict[key], typing.ByteString):
+            input_dict[key] = remove_byte_chars(input_dict[key])
 
     #The next two lines can be used in place of the for loop if the for loop takes too long
-    #od=collections.OrderedDict(sorted(input_dict.items()))
-    #l = od.values()
+    od=collections.OrderedDict(sorted(input_dict.items()))
+    l = od.values()
 
     #A list of values of the song dictionary that is entered to the list based on sorted keys
-    for key in sorted(input_dict.iterkeys()):
-        l.append(input_dict[key])
+    #for key in sorted(input_dict.iterkeys()):
+     #   l.append(input_dict[key])
 
     return l
 
@@ -246,8 +257,6 @@ def main():
         directories2 = os.listdir(path + directory1)
         for directory2 in directories2: #A/A
             directories3 = os.listdir(path + directory1 + '/' + directory2)
-            if directory2 != 'A':
-                continue
             for directory3 in directories3: #A/A/A
                 file_path = path + directory1 + '/' + directory2 + '/' + directory3 + '/'
                 files = os.listdir(file_path)
@@ -258,7 +267,6 @@ def main():
                         for song_index in range(0,num_songs):
                             my_dict = build_h5_dictionary(h5_file, song_index)
                             newList=clean_h5_dictionary(my_dict)
-
                             #See if newList is empty, if it is not then add it to writelist to be put into the csv file
                             if not newList:
                                 continue
