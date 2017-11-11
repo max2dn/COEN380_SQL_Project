@@ -77,8 +77,6 @@ def build_h5_dictionary(h5_file, song_id):
 
     return song_dict
 
-def dummy_function(word):
-    print(word)
 
 def main():
     path = '/Users/maxenchung/Desktop/untitled/MillionSongSubset/data/'
